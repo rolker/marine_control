@@ -10,7 +10,7 @@
     parameter. No Qt — the operator station renders the set. ADR-0003 (D4/D5/D6).
   </description>
   <maintainer email="roland+claude-code@ccom.unh.edu">Roland Arsenault</maintainer>
-  <license>MIT</license>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
