@@ -35,6 +35,23 @@
 // server is built on the node *interfaces* so it works with both rclcpp::Node
 // and rclcpp_lifecycle::LifecycleNode (the reflex adopter is a LifecycleNode).
 // The node must outlive the ControlServer.
+//
+// Threading contract: the heartbeat timer and the change subscription run in a
+// dedicated mutually-exclusive callback group, so they never execute
+// concurrently with each other even under a multi-threaded executor. Call
+// bind_parameter() during setup, *before* the node starts spinning — it mutates
+// the binding table without locking and is not safe to call concurrently with
+// the running callbacks. Likewise, destroy the server only when the node is not
+// spinning (the destructor tears down the timer/sub, but an in-flight callback
+// on another thread would race).
+//
+// Lifecycle note: the publisher, subscription, and heartbeat timer are created
+// in the constructor, so the server is active as soon as it is constructed — it
+// is NOT gated on a LifecycleNode's active state. For lifecycle gating,
+// construct the ControlServer in on_activate() and reset it in on_deactivate().
+// A safety-critical adopter (ADR-0003 D8.3) that needs confirmation/audit
+// beyond the fire-and-forget change semantics layers that on top of this
+// mechanism; see issue #3 follow-ups.
 #ifndef MARINE_CONTROL__CONTROL_SERVER_HPP_
 #define MARINE_CONTROL__CONTROL_SERVER_HPP_
 
@@ -135,6 +152,9 @@ private:
   // deterministic (alphabetical) which is good enough and stable.
   std::map<std::string, Binding> bindings_;
 
+  // Dedicated mutually-exclusive group: the timer and change sub never run
+  // concurrently with each other (see the threading contract above).
+  rclcpp::CallbackGroup::SharedPtr callback_group_;
   rclcpp::Publisher<marine_control_interfaces::msg::ControlSet>::SharedPtr state_pub_;
   rclcpp::Subscription<marine_control_interfaces::msg::ControlValue>::SharedPtr change_sub_;
   rclcpp::TimerBase::SharedPtr heartbeat_timer_;

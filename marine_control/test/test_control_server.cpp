@@ -74,6 +74,29 @@ protected:
     return nullptr;
   }
 
+  // Publish `value` to the change topic and spin for up to `seconds`, breaking
+  // early when `done()` is satisfied. Returns whatever the loop left in place.
+  template<typename DoneFn>
+  void drive_change(
+    const std::string & name, const std::string & value, DoneFn done,
+    double seconds)
+  {
+    auto pub = node_->create_publisher<ControlValue>(
+      "~/control/change", rclcpp::QoS(10).reliable());
+    ControlValue v;
+    v.name = name;
+    v.value = value;
+    rclcpp::executors::SingleThreadedExecutor exec;
+    exec.add_node(node_);
+    const auto start = node_->now();
+    while ((node_->now() - start).seconds() < seconds) {
+      pub->publish(v);
+      exec.spin_some();
+      rclcpp::sleep_for(std::chrono::milliseconds(20));
+      if (done()) {break;}
+    }
+  }
+
   std::shared_ptr<rclcpp::Node> node_;
 };
 
@@ -129,21 +152,58 @@ TEST_F(ControlServerTest, ChangeAppliesParameterAndIsValidated)
   marine_control::ControlServer server(node_.get());
   server.bind_parameter("obstacle_prob_min");
 
-  auto pub = node_->create_publisher<ControlValue>(
-    "~/control/change", rclcpp::QoS(10).reliable());
-
-  ControlValue v;
-  v.name = "obstacle_prob_min";
-  v.value = "0.75";
-
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node_);
-  const auto start = node_->now();
-  while ((node_->now() - start).seconds() < 3.0) {
-    pub->publish(v);
-    exec.spin_some();
-    rclcpp::sleep_for(std::chrono::milliseconds(20));
-    if (node_->get_parameter("obstacle_prob_min").as_double() > 0.7) {break;}
-  }
+  drive_change(
+    "obstacle_prob_min", "0.75",
+    [&] {return node_->get_parameter("obstacle_prob_min").as_double() > 0.7;}, 3.0);
   EXPECT_NEAR(node_->get_parameter("obstacle_prob_min").as_double(), 0.75, 1e-6);
+}
+
+// A value outside the descriptor's range is rejected by the node's own
+// validation; the parameter is left unchanged (and state is still echoed).
+TEST_F(ControlServerTest, OutOfRangeChangeIsRejectedAndLeavesParamUnchanged)
+{
+  marine_control::ControlServer server(node_.get());
+  server.bind_parameter("obstacle_prob_min");
+
+  // 5.0 is well above the 0.95 ceiling. Spin a fixed window (no early-out — we
+  // are asserting the value never moves).
+  drive_change("obstacle_prob_min", "5.0", [] {return false;}, 1.0);
+  EXPECT_NEAR(node_->get_parameter("obstacle_prob_min").as_double(), 0.6, 1e-6);
+}
+
+// Malformed numeric input must be rejected, not silently truncated/partial-parsed.
+TEST_F(ControlServerTest, MalformedNumericChangeIsRejected)
+{
+  marine_control::ControlServer server(node_.get());
+  server.bind_parameter("count");        // int, default 7
+  server.bind_parameter("obstacle_prob_min");  // double, default 0.6
+
+  // "3.5" into an INT must NOT truncate to 3.
+  drive_change("count", "3.5", [] {return false;}, 0.6);
+  EXPECT_EQ(node_->get_parameter("count").as_int(), 7);
+
+  // trailing garbage into a DOUBLE must be rejected, not partial-parsed to 0.75.
+  drive_change("obstacle_prob_min", "0.75abc", [] {return false;}, 0.6);
+  EXPECT_NEAR(node_->get_parameter("obstacle_prob_min").as_double(), 0.6, 1e-6);
+}
+
+// A change for a name that was never bound is ignored (no throw, no effect).
+TEST_F(ControlServerTest, UnboundChangeIsIgnored)
+{
+  marine_control::ControlServer server(node_.get());
+  server.bind_parameter("obstacle_prob_min");
+
+  drive_change("mode", "aggressive", [] {return false;}, 0.6);
+  EXPECT_EQ(node_->get_parameter("mode").as_string(), "balanced");
+}
+
+// The published echo (build_control_set) renders a double without precision
+// inflation — 0.6 is "0.6", not "0.600000".
+TEST_F(ControlServerTest, FloatEchoIsRoundTrippable)
+{
+  marine_control::ControlServer server(node_.get());
+  server.bind_parameter("obstacle_prob_min");
+  const auto * f = find(server.build_control_set(), "obstacle_prob_min");
+  ASSERT_NE(f, nullptr);
+  EXPECT_EQ(f->value, "0.6");
 }
