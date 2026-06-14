@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>marine_control</name>
+  <version>0.0.1</version>
+  <description>
+    Boat-side device-control library: publish a ControlSet describing a node's
+    bound parameters on a bridge-correct heartbeat (state, device-&gt;operator) and
+    apply inbound ControlValue (change, operator-&gt;device) by setting the bound
+    parameter. No Qt — the operator station renders the set. ADR-0003 (D4/D5/D6).
+  </description>
+  <maintainer email="roland+claude-code@ccom.unh.edu">Roland Arsenault</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>marine_control_interfaces</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
