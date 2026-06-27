@@ -17,6 +17,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+# Build position-independent so this (static) archive can be linked into shared
+# objects — ROS 2 plugins (.so) such as nav2 controller/costmap-layer adopters,
+# not just executables. Without this, linking it into a plugin fails with
+# "relocation R_X86_64_PC32 ... can not be used when making a shared object".
+set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 ament_target_dependencies(${PROJECT_NAME} rclcpp marine_control_interfaces)
 
 install(DIRECTORY include/ DESTINATION include)
