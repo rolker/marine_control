@@ -76,3 +76,41 @@ Host note for the planner: the first Action is already checked. `origin/rolling`
 **Plan**: `.agent/work-plans/issue-13/plan.md` at `87ca933`
 
 Two parts: part 1 to rolling (target_link_libraries fix plus a jazzy/rolling CI matrix), part 2 a CMake-only backport to jazzy; Jazzy verified by CI only.
+
+## Plan Review
+**Status**: complete
+**When**: 2026-11-19 09:28 -05:00
+**By**: Claude Code Agent (claude-opus-5-5)
+**Verdict**: ready
+
+**Issue**: #13 — Build on ROS 2 Rolling: replace ament_target_dependencies, add a rolling branch and CI
+**Plan**: `.agent/work-plans/issue-13/plan.md` at `87ca933`
+**Branch**: `feature/issue-13`
+
+### Evaluation
+
+| Dimension | Verdict | Notes |
+|---|---|---|
+| Scope | Good | Two small PRs (CMake + CI to `rolling`, CMake-only backport to `jazzy`); three files at most. |
+| Issue alignment | Good | Covers all four Work items and the three Done-when lines. All four Issue Review actions are addressed (F1 rolling branch already at 68118f2; F2 matrix with `ros:rolling-ros-core`; F3 `target_link_libraries` with exported targets plus a typesupport fallback; F4 step 3 checks package.xml / py tests). Serves: "None (project has no written goals); no project design document. Part of rolker/unh_marine_autonomy#415" — acceptable, project keeps no goals. |
+| File targeting | Good | `marine_control/CMakeLists.txt` lines 25 and 44 are the only `ament_target_dependencies` calls; `marine_control_interfaces/CMakeLists.txt` uses only `rosidl_generate_interfaces` and needs no change. |
+| Consequences | Good | ci.yml header, downstream consumers (PUBLIC linkage + `ament_export_dependencies` kept), README, Jazzy CI untouched. |
+| Principle alignment | Needs work | Baseline failure first (Test what breaks), Jazzy claimed only after CI (Verify before claiming). The `.agent/` exclusion is asserted but has no mechanism (finding 1). |
+| ADR compliance | Good | 0002, 0013, 0019 (PR base from `repo_pin`) addressed. |
+| ROS conventions | Good | Modern target linking is the recommended Rolling migration. Checked on /opt/ros/rolling: `ament_cmake_export_targets-extras.cmake` appends to `<pkg>_TARGETS`, so `${marine_control_interfaces_TARGETS}` resolves for a rosidl package found by `find_package` (finding 3). |
+
+### Findings
+
+1. **[Principle alignment]** (Medium) — The plan says `.agent/` stays out of both project PRs ("Leave in a project only what it chose to carry") but names no mechanism, and `feature/issue-13` already differs from `origin/rolling` only by four `.agent/` commits (c53567c, 212c2b5, 87ca933, ae111ec); earlier feature branches on origin carry no `.agent/`. A PR opened from this branch as is would carry the plan and progress files. Resolution: state how the PR head is kept clean (e.g. the implementation commits go on a PR branch cut from `origin/rolling` without the `.agent/` commits, or the host's publish step strips them), and do the same for the part 2 backport branch (cherry-pick only the CMake commit, as step 7 already says).
+2. **[Approach]** (Low) — Step 4 says "one workflow then serves both branches (… a `jazzy` push tests Jazzy)", but step 7 leaves `jazzy`'s `ci.yml` unchanged, so the matrix lives only on `rolling`. The real effect is that PRs to `rolling` run both a Jazzy and a Rolling leg — useful early evidence that the same CMake builds on Jazzy before the backport, but a standing cost once `rolling` diverges with Rolling-only code. Resolution: correct the wording, and record in the cost write-up whether the Jazzy leg on `rolling` is kept or dropped; the `jazzy` entries in `rolling`'s branch triggers are then moot and can be omitted or explained in the header comment.
+3. **[ROS conventions]** (Info) — Rolling also installs `rosidl_cmake_aggregate_target-extras.cmake`, giving interface packages an aggregate `<pkg>::<pkg>` target (seen for `std_msgs`). Do not use `marine_control_interfaces::marine_control_interfaces`: the same commit must build on Jazzy for the backport. `${marine_control_interfaces_TARGETS}` (or the `__rosidl_typesupport_cpp` fallback) is the form that works on both, as the plan already chooses.
+
+### Summary
+
+Sound, minimal plan that answers the issue and every Issue Review action; the CMake approach checks out against the installed Rolling config. Ready for implementation once the `.agent/` exclusion has a concrete mechanism.
+
+### Recommended Actions
+
+- [ ] Name how the part 1 and part 2 PR branches are kept free of `.agent/` commits (finding 1).
+- [ ] Correct step 4's "a `jazzy` push tests Jazzy" wording and decide whether the Jazzy leg stays on `rolling` (finding 2).
+- [ ] Keep `${marine_control_interfaces_TARGETS}` rather than Rolling's aggregate target (finding 3).
