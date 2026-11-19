@@ -173,3 +173,21 @@ Specialists: static analysis (ament_flake8 clean on both Python files; ci.yml pa
 Asked "Publish: push the branch and open the pull request to `rolling`?" with the pre-push review's verdict (round 1 approved, 0 must-fix, 0 suggestions), the files to be pushed, what was verified on Rolling and that Jazzy is not verified. The owner answered: "Publish (Recommended)".
 
 Asked also "How should the push authenticate?" (the clone's `origin` is an https URL with no git credential). The owner answered: "Push to the SSH URL (Recommended)": the host pushes to `git@github.com:rolker/marine_control.git` and changes no configuration.
+
+## Integrated Review
+**Status**: complete
+**When**: 2026-11-19 09:57 -05:00
+**By**: Claude Code Agent (claude-opus-5-5)
+
+**PR**: #14 at `3ca393f`
+**Sources**: 2 (Local Review (Pre-Push) @ `fcee3c8` (covers 3ca393f via bookkeeping: only `.agent/work-plans/issue-13/progress.md` changed since), CI rollup @ `3ca393f`)
+**Cross-source confirmations**: 0
+**CI**: all-pass
+
+GitHub side: 0 reviews, 0 inline comments, 0 conversation comments, no Copilot review. The pre-push review approved with 0 must-fix and 0 suggestions; its one box ("No issues found. LGTM.") is a verdict, not an action item. CI `build-and-test (jazzy)` and `build-and-test (rolling)` both pass at `3ca393f`; the Jazzy leg is the first Jazzy verification the Implementation entry and the pre-push review said was still owed, and it now holds.
+
+### Findings
+- None.
+
+### False positives
+- None.
