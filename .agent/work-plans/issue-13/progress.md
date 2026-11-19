@@ -161,3 +161,15 @@ Specialists: static analysis (ament_flake8 clean on both Python files; ci.yml pa
 
 ### Findings
 - [ ] No issues found. LGTM.
+
+## Checkpoint
+**Status**: complete
+**When**: 2026-11-19 09:54 -05:00
+**By**: Claude Code Agent (claude-fable-5-2)
+**Decided-by**: owner
+**After**: publish
+**Decision**: publish
+
+Asked "Publish: push the branch and open the pull request to `rolling`?" with the pre-push review's verdict (round 1 approved, 0 must-fix, 0 suggestions), the files to be pushed, what was verified on Rolling and that Jazzy is not verified. The owner answered: "Publish (Recommended)".
+
+Asked also "How should the push authenticate?" (the clone's `origin` is an https URL with no git credential). The owner answered: "Push to the SSH URL (Recommended)": the host pushes to `git@github.com:rolker/marine_control.git` and changes no configuration.
