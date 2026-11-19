@@ -68,3 +68,11 @@ issue: 13
 Asked "Go on to planning with F1 to F4 handed to the planner as input?" (F1 to F4 are the four Actions of the Issue Review above). The owner answered: "Proceed (Recommended)".
 
 Host note for the planner: the first Action is already checked. `origin/rolling` was created by the host at 68118f2, the tip of `jazzy` at that time.
+
+## Plan Authored
+**Status**: complete
+**When**: 2026-11-19 09:27 -05:00
+**By**: Claude Code Agent (claude-sonnet-5-5)
+**Plan**: `.agent/work-plans/issue-13/plan.md` at `87ca933`
+
+Two parts: part 1 to rolling (target_link_libraries fix plus a jazzy/rolling CI matrix), part 2 a CMake-only backport to jazzy; Jazzy verified by CI only.
