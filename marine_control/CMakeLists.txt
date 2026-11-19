@@ -22,7 +22,9 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 # not just executables. Without this, linking it into a plugin fails with
 # "relocation R_X86_64_PC32 ... can not be used when making a shared object".
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-ament_target_dependencies(${PROJECT_NAME} rclcpp marine_control_interfaces)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  rclcpp::rclcpp
+  ${marine_control_interfaces_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include)
 install(
@@ -41,7 +43,6 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_control_server test/test_control_server.cpp)
   target_link_libraries(test_control_server ${PROJECT_NAME})
-  ament_target_dependencies(test_control_server rclcpp marine_control_interfaces)
 endif()
 
 ament_package()
