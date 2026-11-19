@@ -114,3 +114,19 @@ Sound, minimal plan that answers the issue and every Issue Review action; the CM
 - [ ] Name how the part 1 and part 2 PR branches are kept free of `.agent/` commits (finding 1).
 - [ ] Correct step 4's "a `jazzy` push tests Jazzy" wording and decide whether the Jazzy leg stays on `rolling` (finding 2).
 - [ ] Keep `${marine_control_interfaces_TARGETS}` rather than Rolling's aggregate target (finding 3).
+
+## Checkpoint
+**Status**: complete
+**When**: 2026-11-19 09:46 -05:00
+**By**: Claude Code Agent (claude-fable-5-2)
+**Decided-by**: owner
+**After**: plan
+**Decision**: proceed
+
+Three questions were asked with the plan and the Plan Review's findings F1 to F3 quoted. The owner's answers, verbatim:
+
+- Q1 "Go ahead and implement this plan, with your answers to Q2 and Q3 handed to the implementer as overrides?": "Proceed (Recommended)".
+- Q2 "Should the PR to `rolling` carry the `.agent/work-plans/issue-13/` records, as the other project repos do?": "Carry them (Recommended)". This overrides the plan's statement that `.agent/` stays out of the project PRs, and answers Plan Review finding 1: the PR to `rolling` is opened from `feature/issue-13` as it is, records included. The `jazzy` backport carries only the CMake commit.
+- Q3 "Which CI should the `rolling` branch run?": "Jazzy + Rolling matrix (Recommended)". This answers Plan Review finding 2: `ci.yml` on `rolling` runs a Jazzy leg and a Rolling leg for pushes and pull requests to `rolling`; `jazzy`'s own `ci.yml` is not changed. The header comment says so, and the cost write-up records that the Jazzy leg on `rolling` is kept for now.
+
+What the host read for Q2: 11 other repositories of the project carry `.agent/work-plans/` on their branches; `marine_control` has none yet.
