@@ -144,3 +144,20 @@ What the host read for Q2: 11 other repositories of the project carry `.agent/wo
 - `1b519f9` `.github/workflows/ci.yml`: triggers on pushes and PRs to `rolling`; matrix `distro: [jazzy, rolling]`, `fail-fast: false`, `ros:${{ matrix.distro }}-ros-core` on ubuntu-24.04; header comment updated. The Jazzy leg is kept. Check names become `build-and-test (jazzy)` / `build-and-test (rolling)`. YAML parses; actionlint not installed, so not linted.
 - Rolling result (worktree build.sh/test.sh): `Summary: 3 packages finished`; marine_control `100% tests passed, 0 tests failed out of 7`; marine_control_interfaces `100% tests passed, 0 tests failed out of 3`; marine_control_py `11 passed`; `colcon test-result --verbose`: `Summary: 44 tests, 0 errors, 0 failures, 3 skipped` (the skips are ament_cppcheck declining cppcheck 2.19.0 for "known performance issues").
 - Not checked: Jazzy (not installed, no Docker) — Jazzy is verified only by the CI Jazzy leg. Remaining Rolling warnings left alone: CMake `cmake_minimum_required` < 3.10 deprecation in both CMake packages, and setuptools warning about `tests_require` is now gone.
+
+## Local Review (Pre-Push)
+**Status**: complete
+**When**: 2026-11-19 09:53 -05:00
+**By**: Claude Code Agent (claude-opus-5-5)
+**Verdict**: approved
+
+**Branch**: feature/issue-13 at `fcee3c8`
+**Base**: origin/rolling
+**Depth**: Deep (reason: 260 changed lines, 200+; CI workflow is an override trigger; 200 of the lines are the `.agent/work-plans/issue-13/` records)
+**Must-fix**: 0 | **Suggestions**: 0
+**Round**: 1 | **Ship**: recommended — no must-fix findings
+
+Specialists: static analysis (ament_flake8 clean on both Python files; ci.yml parses, no line over 120; yamllint and actionlint not installed), governance, plan drift, Claude adversarial (no must-fix), cross-model gemini (EXIT=0, 4 suggestions) and codex (EXIT=0, 3 suggestions). All seven cross-model suggestions were dropped after checking: no `jazzy` remains hard-coded in ci.yml outside the matrix; `rolling` and `jazzy` have no branch protection, so the renamed check names block nothing; the installed `export_marine_controlExport.cmake` carries `rclcpp::rclcpp` and the interface typesupport targets in INTERFACE_LINK_LIBRARIES and `ament_export_dependencies` is kept; no `.warn(` or `tests_require` remains; ubuntu-24.04 for both legs was the plan's stated choice. Jazzy compatibility is reasoned (`<pkg>_TARGETS`, `RcutilsLogger.warning`, colcon reading `extras_require['test']` all predate Jazzy), not verified: the CI Jazzy leg is the first Jazzy check.
+
+### Findings
+- [ ] No issues found. LGTM.
