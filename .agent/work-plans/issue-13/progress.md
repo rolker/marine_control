@@ -191,3 +191,13 @@ GitHub side: 0 reviews, 0 inline comments, 0 conversation comments, no Copilot r
 
 ### False positives
 - None.
+
+## Checkpoint
+**Status**: complete
+**When**: 2026-11-19 11:54 -05:00
+**By**: Claude Code Agent (claude-fable-5-2)
+**Decided-by**: owner
+**After**: merge
+**Decision**: merge
+
+Asked "Merge PR #14 into `rolling`?" with: CI at head 3ca393f (`build-and-test (jazzy)` pass, `build-and-test (rolling)` pass), the Integrated Review's result (no findings), and that the merge is into `rolling`, not the default branch, so issue #13 stays open for part 2 (the `jazzy` backport). The owner answered: "Merge (Recommended)".
