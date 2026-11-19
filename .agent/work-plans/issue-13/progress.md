@@ -130,3 +130,17 @@ Three questions were asked with the plan and the Plan Review's findings F1 to F3
 - Q3 "Which CI should the `rolling` branch run?": "Jazzy + Rolling matrix (Recommended)". This answers Plan Review finding 2: `ci.yml` on `rolling` runs a Jazzy leg and a Rolling leg for pushes and pull requests to `rolling`; `jazzy`'s own `ci.yml` is not changed. The header comment says so, and the cost write-up records that the Jazzy leg on `rolling` is kept for now.
 
 What the host read for Q2: 11 other repositories of the project carry `.agent/work-plans/` on their branches; `marine_control` has none yet.
+
+## Implementation
+**Status**: complete
+**When**: 2026-11-19 09:48 -05:00
+**By**: Claude Code Agent (claude-opus-5-5)
+**Branch**: feature/issue-13 at `1b519f9`
+
+- Baseline on Rolling (before changes): `CMake Error at CMakeLists.txt:25 (ament_target_dependencies): Unknown CMake command "ament_target_dependencies".` — marine_control failed, marine_control_py aborted.
+- `269d90c` `marine_control/CMakeLists.txt` only: library links `PUBLIC rclcpp::rclcpp ${marine_control_interfaces_TARGETS}`; the test's `ament_target_dependencies` line is dropped (it inherits through `${PROJECT_NAME}`). `ament_export_dependencies` kept; the installed export carries rclcpp and the interface typesupport targets. This is the commit to cherry-pick onto `jazzy`.
+- `96dfb0c` `marine_control_py/setup.py`: `tests_require` → `extras_require={'test': ['pytest']}`. Rolling's setuptools (78.1) ignores `tests_require`, so colcon ran unittest, found 0 tests and failed the package.
+- `98071ef` `marine_control_py/control_server.py`: `logger.warn` → `logger.warning` (removed in Rolling's rclpy; six ControlServer tests failed with AttributeError). `warning` exists on Jazzy too.
+- `1b519f9` `.github/workflows/ci.yml`: triggers on pushes and PRs to `rolling`; matrix `distro: [jazzy, rolling]`, `fail-fast: false`, `ros:${{ matrix.distro }}-ros-core` on ubuntu-24.04; header comment updated. The Jazzy leg is kept. Check names become `build-and-test (jazzy)` / `build-and-test (rolling)`. YAML parses; actionlint not installed, so not linted.
+- Rolling result (worktree build.sh/test.sh): `Summary: 3 packages finished`; marine_control `100% tests passed, 0 tests failed out of 7`; marine_control_interfaces `100% tests passed, 0 tests failed out of 3`; marine_control_py `11 passed`; `colcon test-result --verbose`: `Summary: 44 tests, 0 errors, 0 failures, 3 skipped` (the skips are ament_cppcheck declining cppcheck 2.19.0 for "known performance issues").
+- Not checked: Jazzy (not installed, no Docker) — Jazzy is verified only by the CI Jazzy leg. Remaining Rolling warnings left alone: CMake `cmake_minimum_required` < 3.10 deprecation in both CMake packages, and setuptools warning about `tests_require` is now gone.
