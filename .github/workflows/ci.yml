@@ -1,21 +1,31 @@
-# CI for marine_control. Build + test the packages on jazzy. Dependencies
-# (rosidl generators, std_msgs) are pulled by rosdep from each package.xml.
+# CI for marine_control on the rolling branch. Pushes and pull requests to
+# rolling build + test all packages on both Jazzy and Rolling (a distro
+# matrix), so the shared code keeps building on Jazzy for backports to the
+# jazzy branch. The jazzy branch carries its own Jazzy-only workflow.
+# Dependencies (rosidl generators, std_msgs) are pulled by rosdep from each
+# package.xml.
 
 name: CI
 
 on:
   push:
-    branches: [jazzy]
+    branches: [rolling]
   pull_request:
-    branches: [jazzy]
+    branches: [rolling]
 
 jobs:
   build-and-test:
+    name: build-and-test (${{ matrix.distro }})
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [jazzy, rolling]
+    # The container supplies the distro's OS; the host runner only runs it.
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     container:
-      image: ros:jazzy-ros-core
+      image: ros:${{ matrix.distro }}-ros-core
 
     steps:
       - name: Update apt
@@ -48,13 +58,13 @@ jobs:
       - name: Build
         working-directory: ../ws
         run: >
-          bash -c 'source /opt/ros/jazzy/setup.bash &&
+          bash -c 'source /opt/ros/${{ matrix.distro }}/setup.bash &&
           colcon build --cmake-args -DBUILD_TESTING=ON'
 
       - name: Test
         working-directory: ../ws
         run: >
-          bash -c 'source /opt/ros/jazzy/setup.bash &&
+          bash -c 'source /opt/ros/${{ matrix.distro }}/setup.bash &&
           source install/setup.bash &&
           colcon test --event-handlers console_direct+
           --return-code-on-test-failure'
@@ -62,6 +72,6 @@ jobs:
       - name: Test results
         working-directory: ../ws
         run: >
-          bash -c 'source /opt/ros/jazzy/setup.bash &&
+          bash -c 'source /opt/ros/${{ matrix.distro }}/setup.bash &&
           colcon test-result --verbose'
         if: always()
