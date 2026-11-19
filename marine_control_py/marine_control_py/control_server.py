@@ -138,7 +138,7 @@ class ControlServer:
     def bind_parameter(self, name, units='', group=''):
         """Expose an already-declared parameter as a control (descriptor populates the item)."""
         if not self._node.has_parameter(name):
-            self._logger.warn(
+            self._logger.warning(
                 "marine_control: bind_parameter('{}') ignored -- parameter not "
                 'declared. Declare it (with a descriptor) before binding.'.format(name))
             return
@@ -204,7 +204,7 @@ class ControlServer:
             # heartbeat, so an unconditional warn would spam the log.
             if name not in self._unsupported_warned:
                 self._unsupported_warned.add(name)
-                self._logger.warn(
+                self._logger.warning(
                     "marine_control: parameter '{}' has an unsupported type for "
                     'a control; skipping.'.format(name))
             return None
@@ -214,7 +214,7 @@ class ControlServer:
         """Apply one ControlValue to the bound parameter, then echo state (D1)."""
         name = msg.name
         if name not in self._bindings or not self._node.has_parameter(name):
-            self._logger.warn(
+            self._logger.warning(
                 "marine_control: change for unbound/unknown control '{}' "
                 'ignored.'.format(name))
             return
@@ -236,12 +236,12 @@ class ControlServer:
             elif ptype == Parameter.Type.STRING:
                 new_param = Parameter(name, Parameter.Type.STRING, msg.value)
             else:
-                self._logger.warn(
+                self._logger.warning(
                     "marine_control: control '{}' has an unsupported type; "
                     'change ignored.'.format(name))
                 return
         except ValueError:
-            self._logger.warn(
+            self._logger.warning(
                 "marine_control: could not parse change value '{}' for '{}' "
                 '(expected {}); ignored.'.format(msg.value, name, ptype.name))
             return
@@ -250,7 +250,7 @@ class ControlServer:
         results = self._node.set_parameters([new_param])
         if not results or not results[0].successful:
             reason = results[0].reason if results else 'no result returned'
-            self._logger.warn(
+            self._logger.warning(
                 "marine_control: change to '{}' rejected: {}".format(name, reason))
         else:
             # Audit trail: every applied change is logged old -> new. Groundwork
