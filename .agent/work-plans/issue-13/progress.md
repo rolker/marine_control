@@ -56,3 +56,15 @@ issue: 13
 - [ ] Add the Rolling CI job so it checks out `rolling` and uses `ros:rolling-ros-core` (container image, `/opt/ros/rolling/setup.bash`); consider a matrix so one workflow serves both branches, and say which you chose when you write up the cost.
 - [ ] Use `target_link_libraries` with the exported targets (`rclcpp::rclcpp`, `${marine_control_interfaces_TARGETS}` or the typesupport target form for generated interfaces). Confirm the interface-library link works on both Jazzy and Rolling, since the issue says the same form must build on Jazzy.
 - [ ] Check that the package.xml and the `marine_control_py` tests do not hit other Rolling breakage, so "all three packages build and pass" is verified, not assumed.
+
+## Checkpoint
+**Status**: complete
+**When**: 2026-11-19 09:27 -05:00
+**By**: Claude Code Agent (claude-fable-5-2)
+**Decided-by**: owner
+**After**: issue-actions
+**Decision**: proceed
+
+Asked "Go on to planning with F1 to F4 handed to the planner as input?" (F1 to F4 are the four Actions of the Issue Review above). The owner answered: "Proceed (Recommended)".
+
+Host note for the planner: the first Action is already checked. `origin/rolling` was created by the host at 68118f2, the tip of `jazzy` at that time.
